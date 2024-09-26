@@ -138,6 +138,20 @@ func TestMarshalOtelAttributes__WithStructPointerMarshaller(t *testing.T) {
 	assertAttributes(t, want, got)
 }
 
+func TestMarshalOtelAttributes__NestedStructWithMarshallerMember(t *testing.T) {
+	args := struct {
+		Struct structWithMarshaller
+	}{
+		Struct: structWithMarshaller{Value: 200},
+	}
+	want := []attribute.KeyValue{
+		attribute.Int("http.staus_code", 200), // `struct.` prefix is omitted
+	}
+	got, err := MarshalOtelAttributes(args)
+	assert.NoError(t, err)
+	assertAttributes(t, want, got)
+}
+
 type structWithNameAndOmitemptyTags struct {
 	BoolValue   bool      `otelattr:"b,omitempty"`
 	BoolSlice   []bool    `otelattr:"bs,omitempty"`
