@@ -1,4 +1,4 @@
-package otelattr
+package otel
 
 import (
 	"cmp"
@@ -50,16 +50,16 @@ func TestMarshalOtelAttributes__PrimitiveTypes(t *testing.T) {
 }
 
 type structWithNameTags struct {
-	BoolValue   bool      `otelattr:"b"`
-	BoolSlice   []bool    `otelattr:"bs"`
-	IntValue    int       `otelattr:"i"`
-	IntSlice    []int     `otelattr:"is"`
-	Int64Value  int64     `otelattr:"i64"`
-	Int64Slice  []int64   `otelattr:"is64"`
-	FloatValue  float64   `otelattr:"f"`
-	FloatSlice  []float64 `otelattr:"fs"`
-	StringValue string    `otelattr:"s"`
-	StringSlice []string  `otelattr:"ss"`
+	BoolValue   bool      `otel:"b"`
+	BoolSlice   []bool    `otel:"bs"`
+	IntValue    int       `otel:"i"`
+	IntSlice    []int     `otel:"is"`
+	Int64Value  int64     `otel:"i64"`
+	Int64Slice  []int64   `otel:"is64"`
+	FloatValue  float64   `otel:"f"`
+	FloatSlice  []float64 `otel:"fs"`
+	StringValue string    `otel:"s"`
+	StringSlice []string  `otel:"ss"`
 }
 
 func TestMarshalOtelAttributes__WithTags(t *testing.T) {
@@ -88,16 +88,16 @@ func TestMarshalOtelAttributes__WithTags(t *testing.T) {
 }
 
 type structWithOmitemptyTags struct {
-	BoolValue   bool      `otelattr:",omitempty"`
-	BoolSlice   []bool    `otelattr:",omitempty"`
-	IntValue    int       `otelattr:",omitempty"`
-	IntSlice    []int     `otelattr:",omitempty"`
-	Int64Value  int64     `otelattr:",omitempty"`
-	Int64Slice  []int64   `otelattr:",omitempty"`
-	FloatValue  float64   `otelattr:",omitempty"`
-	FloatSlice  []float64 `otelattr:",omitempty"`
-	StringValue string    `otelattr:",omitempty"`
-	StringSlice []string  `otelattr:",omitempty"`
+	BoolValue   bool      `otel:",omitempty"`
+	BoolSlice   []bool    `otel:",omitempty"`
+	IntValue    int       `otel:",omitempty"`
+	IntSlice    []int     `otel:",omitempty"`
+	Int64Value  int64     `otel:",omitempty"`
+	Int64Slice  []int64   `otel:",omitempty"`
+	FloatValue  float64   `otel:",omitempty"`
+	FloatSlice  []float64 `otel:",omitempty"`
+	StringValue string    `otel:",omitempty"`
+	StringSlice []string  `otel:",omitempty"`
 }
 
 func TestMarshalOtelAttributes__WithOmitempty(t *testing.T) {
@@ -153,16 +153,16 @@ func TestMarshalOtelAttributes__NestedStructWithMarshallerMember(t *testing.T) {
 }
 
 type structWithNameAndOmitemptyTags struct {
-	BoolValue   bool      `otelattr:"b,omitempty"`
-	BoolSlice   []bool    `otelattr:"bs,omitempty"`
-	IntValue    int       `otelattr:"i,omitempty"`
-	IntSlice    []int     `otelattr:"is,omitempty"`
-	Int64Value  int64     `otelattr:"i64,omitempty"`
-	Int64Slice  []int64   `otelattr:"is64,omitempty"`
-	FloatValue  float64   `otelattr:"f,omitempty"`
-	FloatSlice  []float64 `otelattr:"fs,omitempty"`
-	StringValue string    `otelattr:"s,omitempty"`
-	StringSlice []string  `otelattr:"ss,omitempty"`
+	BoolValue   bool      `otel:"b,omitempty"`
+	BoolSlice   []bool    `otel:"bs,omitempty"`
+	IntValue    int       `otel:"i,omitempty"`
+	IntSlice    []int     `otel:"is,omitempty"`
+	Int64Value  int64     `otel:"i64,omitempty"`
+	Int64Slice  []int64   `otel:"is64,omitempty"`
+	FloatValue  float64   `otel:"f,omitempty"`
+	FloatSlice  []float64 `otel:"fs,omitempty"`
+	StringValue string    `otel:"s,omitempty"`
+	StringSlice []string  `otel:"ss,omitempty"`
 }
 
 func TestMarshalOtelAttributes__WithStructInStruct(t *testing.T) {
@@ -215,7 +215,7 @@ func TestMarshalOtelAttributes__WithStructInStructPointer(t *testing.T) {
 
 func TestMarshalOtelAttributes__WithStructInStructWithPrefix(t *testing.T) {
 	args := struct {
-		Struct structWithNameAndOmitemptyTags `otelattr:"test"`
+		Struct structWithNameAndOmitemptyTags `otel:"test"`
 	}{
 		Struct: structWithNameAndOmitemptyTags{
 			BoolSlice:   []bool{true},
@@ -239,7 +239,7 @@ func TestMarshalOtelAttributes__WithStructInStructWithPrefix(t *testing.T) {
 
 func TestMarshalOtelAttributes__WithIgnoreField(t *testing.T) {
 	args := struct {
-		IgnoreField int `otelattr:"-"`
+		IgnoreField int `otel:"-"`
 	}{
 		IgnoreField: 100,
 	}

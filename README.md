@@ -1,21 +1,21 @@
-# otelattr
+# spans
 
-## Usage 
+Provides an easy way to create OpenTelemetry spans with structured attributes.
 
-```golang
+## Usage
+
+```go
 package main
 
 import (
-	"encoding/json"
-	"os"
-
-	"github.com/mashiike/otelattr"
+	"github.com/ebi-yade/spans"
+	"go.opentelemetry.io/otel"
 )
 
 type HTTPContext struct {
-		Status int    `otelattr:"http.status_code"`
-		Method string `otelattr:"http.method"`
-		Path   string `otelattr:"http.path"`
+	Status int    `otel:"status_code"`
+	Method string `otel:"method"`
+	Path   string `otel:"path"`
 }
 
 func main() {
@@ -24,21 +24,11 @@ func main() {
 		Method: "GET",
 		Path:   "/",
 	}
-	attrs, err := otelattr.MarshalOtelAttributes(httpCtx)
-	if err != nil {
-		panic(err)
-	}
-	enc := json.NewEncoder(os.Stdout)
-	for _, attr := range attrs {
-		if err := enc.Encode(attr); err != nil {
-			panic(err)
-		}
-	}
-	// Output:
-	//{"Key":"http.status_code","Value":{"Type":"INT64","Value":200}}
-	//{"Key":"http.method","Value":{"Type":"STRING","Value":"GET"}}
-	//{"Key":"http.path","Value":{"Type":"STRING","Value":"/"}}
+	ctx, spans := otel.Tracer("handler").Start("foo", spans.WithAttrs(
+		spans.ObjectAttr("http", httpCtx),
+	))
 }
+
 ```
 
 LICENSE: MIT

@@ -1,4 +1,4 @@
-package otelattr
+package otel
 
 import (
 	"reflect"
@@ -27,7 +27,7 @@ func getStructFields(t reflect.Type) []structFiled {
 		if f.PkgPath != "" {
 			continue
 		}
-		tag := f.Tag.Get("otelattr")
+		tag := f.Tag.Get("otel")
 		tagParts := strings.Split(tag, ",")
 		if tagParts[0] == "-" {
 			continue

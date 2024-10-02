@@ -1,4 +1,4 @@
-package otelattr
+package otel
 
 import (
 	"testing"

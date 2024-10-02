@@ -1,4 +1,4 @@
-module github.com/mashiike/otelattr
+module github.com/ebi-yade/spans
 
 go 1.22
 
