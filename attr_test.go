@@ -1,7 +1,9 @@
 package otelattr
 
 import (
+	"cmp"
 	"fmt"
+	"slices"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -255,6 +257,13 @@ func TestMarshalOtelAttributes__WithMap(t *testing.T) {
 
 func assertAttributes(tb testing.TB, want, got []attribute.KeyValue, msgAndArgs ...interface{}) bool {
 	tb.Helper()
+
+	sortKV := func(i, j attribute.KeyValue) int {
+		return cmp.Compare(i.Key, j.Key)
+	}
+	slices.SortFunc(want, sortKV)
+	slices.SortFunc(got, sortKV)
+
 	if !assert.ObjectsAreEqualValues(want, got) {
 		return assert.Fail(tb,
 			fmt.Sprintf(
