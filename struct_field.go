@@ -3,6 +3,7 @@ package otelattr
 import (
 	"reflect"
 	"strings"
+	"unicode"
 )
 
 type structFiled struct {
@@ -60,10 +61,16 @@ func getStructFields(t reflect.Type) []structFiled {
 func camelToSnake(s string) string {
 	var result []rune
 	for i, r := range s {
-		if i > 0 && 'A' <= r && r <= 'Z' {
-			result = append(result, '_')
+		if unicode.IsUpper(r) {
+			if i > 0 {
+				if !unicode.IsUpper(rune(s[i-1])) || (i+1 < len(s) && unicode.IsLower(rune(s[i+1]))) {
+					result = append(result, '_')
+				}
+			}
+			result = append(result, unicode.ToLower(r))
+		} else {
+			result = append(result, r)
 		}
-		result = append(result, r)
 	}
-	return strings.ToLower(string(result))
+	return string(result)
 }
