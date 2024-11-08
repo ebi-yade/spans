@@ -32,3 +32,7 @@ func main() {
 ```
 
 LICENSE: MIT
+
+## Acknowledgements
+
+The prototype of this library was created by @mashiike.
