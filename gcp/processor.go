@@ -62,6 +62,7 @@ func (p *Processor) convertAttributes(s trace.ReadWriteSpan) {
 func (p *Processor) ensureCompatibleAttr(attr attribute.KeyValue) (attribute.KeyValue, bool) {
 	key := attr.Key
 
+	//nolint:exhaustive
 	switch attr.Value.Type() {
 	case attribute.FLOAT64:
 		return key.String(fmt.Sprintf("%f", attr.Value.AsFloat64())), true
