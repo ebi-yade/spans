@@ -2,6 +2,12 @@
 
 Provides an easy way to create OpenTelemetry spans with structured attributes.
 
+## Installation
+
+```sh
+go get github.com/ebi-yade/spans
+```
+
 ## Usage
 
 ```go
@@ -13,9 +19,12 @@ import (
 )
 
 type HTTPContext struct {
-	Status int    `otel:"status_code"`
-	Method string `otel:"method"`
-	Path   string `otel:"path"`
+	Status     int    `otel:"status_code"` // you can explicitly specify the key suffix
+	Method     string `otel:"method"`
+	Path       string // => key suffix is "path"
+	RemoteAddr string // => key suffix is "remote_addr"
+
+	AuthHeader string `otel:"-"` // you also can ignore the field
 }
 
 func main() {
