@@ -23,6 +23,9 @@ func main() {
 }
 
 func main_() error {
+	ctx, stop := context.WithCancel(context.Background())
+	defer stop()
+
 	exp, err := exporter.New(
 		exporter.WithTraceClientOptions([]option.ClientOption{option.WithTelemetryDisabled()}), // avoid recursive spans
 	)
@@ -35,6 +38,7 @@ func main_() error {
 		sdktrace.WithSpanProcessor(gcp.NewProcessor(batchProcessor)), // <= IMPORTANT!
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),                // not recommended for production
 	)
+	defer tp.ForceFlush(ctx)
 	otel.SetTracerProvider(tp)
 
 	if err := doSomething(context.Background()); err != nil {
