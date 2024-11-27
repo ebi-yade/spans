@@ -1,11 +1,11 @@
-module testdata
+module github.com/ebi-yade/spans/gcp/testdata
 
 go 1.23.2
 
 require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.25.0
 	github.com/cockroachdb/errors v1.11.3
-	github.com/ebi-yade/spans v0.0.0-00010101000000-000000000000
+	github.com/ebi-yade/spans v0.0.3-0.20241111013100-1103f2c50d5c
 	go.opentelemetry.io/otel v1.31.0
 	go.opentelemetry.io/otel/sdk v1.31.0
 	google.golang.org/api v0.205.0
@@ -50,5 +50,3 @@ require (
 	google.golang.org/grpc v1.67.1 // indirect
 	google.golang.org/protobuf v1.35.1 // indirect
 )
-
-replace github.com/ebi-yade/spans => ../..

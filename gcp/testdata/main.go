@@ -57,9 +57,6 @@ type Something struct {
 
 	SecretString string `otel:"-"`
 
-	Time     time.Time
-	Duration time.Duration
-
 	IntSlice    []int
 	StringSlice []string
 }
@@ -73,17 +70,15 @@ func newSomething() Something {
 
 		SecretString: "secret",
 
-		Time:     time.Now(),
-		Duration: 10 * time.Second,
-
 		IntSlice:    []int{1, 2, 3},
 		StringSlice: []string{"hello", "world"},
 	}
 }
 
 func doSomething(ctx context.Context) error {
+	sth := newSomething()
 	ctx, span := tracer.Start(ctx, "doSomething", spans.WithAttrs(
-		spans.ObjectAttr("something", newSomething()),
+		spans.ObjectAttr("something", sth),
 	))
 	defer span.End()
 
