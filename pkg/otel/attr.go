@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"time"
 
 	"go.opentelemetry.io/otel/attribute"
 )
@@ -144,6 +145,8 @@ func marshalMap(rv reflect.Value) ([]attribute.KeyValue, error) {
 			attrs = append(attrs, attribute.Float64Slice(keyString, value))
 		case []string:
 			attrs = append(attrs, attribute.StringSlice(keyString, value))
+		case time.Time:
+			attrs = append(attrs, attribute.String(keyString, value.Format(time.RFC3339)))
 		default:
 			kvs, err := marshalField(structFiled{
 				attributeName:   keyString,
