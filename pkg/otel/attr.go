@@ -3,7 +3,6 @@ package otel
 import (
 	"encoding/json"
 	"fmt"
-
 	"reflect"
 	"time"
 
@@ -257,14 +256,14 @@ func marshalSlice(f structFiled, fv reflect.Value) ([]attribute.KeyValue, error)
 			}
 			return []attribute.KeyValue{attribute.StringSlice(f.attributeName, strs)}, nil
 		}
-		fallthrough // OpenTelemetry プロトコルのレベルで、そもそも合成型の配列は非対応のため、いずれにせよ文字列化以外の選択肢は与えない
-	default:
-		bs, err := json.Marshal(fv.Interface())
-		if err != nil {
-			return []attribute.KeyValue{}, err
-		}
-		return []attribute.KeyValue{attribute.String(f.attributeName, string(bs))}, nil
+		// There is no choice but to provide only stringification because composite arrays are not supported at the OpenTelemetry protocol level.
 	}
+	bs, err := json.Marshal(fv.Interface())
+	if err != nil {
+		return []attribute.KeyValue{}, err
+	}
+
+	return []attribute.KeyValue{attribute.String(f.attributeName, string(bs))}, nil
 }
 
 func reflectValueToSlice[T any](v reflect.Value) []T {
