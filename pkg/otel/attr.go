@@ -195,6 +195,14 @@ func marshalField(f structFiled, fv reflect.Value) ([]attribute.KeyValue, error)
 	case reflect.Slice, reflect.Array:
 		return marshalSlice(f, fv)
 	case reflect.Struct:
+		// convert time.Time to string
+		if fv.Type().ConvertibleTo(timeType) {
+			return []attribute.KeyValue{
+				attribute.String(f.attributeName, fv.Interface().(time.Time).Format(time.RFC3339)),
+			}, nil
+		}
+
+		// delve into normal struct types
 		kvs, err := MarshalOtelAttributes(fv.Interface())
 		if err != nil {
 			return nil, err
@@ -229,6 +237,17 @@ func marshalSlice(f structFiled, fv reflect.Value) ([]attribute.KeyValue, error)
 		return []attribute.KeyValue{attribute.Float64Slice(f.attributeName, reflectValueToSlice[float64](fv))}, nil
 	case reflect.String:
 		return []attribute.KeyValue{attribute.StringSlice(f.attributeName, reflectValueToSlice[string](fv))}, nil
+	case reflect.Struct:
+		if fv.Type().Elem().ConvertibleTo(timeType) {
+			// TODO: consider reimplemeting it with samber/lo.Map
+			times := reflectValueToSlice[time.Time](fv)
+			strs := make([]string, len(times))
+			for i, t := range times {
+				strs[i] = t.Format(time.RFC3339)
+			}
+			return []attribute.KeyValue{attribute.StringSlice(f.attributeName, strs)}, nil
+		}
+		fallthrough
 	default:
 		bs, err := json.Marshal(fv.Interface())
 		if err != nil {
