@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"log/slog"
 
+	pkgotel "github.com/ebi-yade/spans/pkg/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
-
-	pkgotel "github.com/ebi-yade/spans/pkg/otel"
 )
 
 type KeyValue struct {
