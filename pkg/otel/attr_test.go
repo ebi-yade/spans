@@ -173,11 +173,7 @@ func TestMarshalOtelAttributes__WithStructPointerMarshaller(t *testing.T) {
 }
 
 func TestMarshalOtelAttributes__NestedStructWithMarshallerMember(t *testing.T) {
-	args := struct {
-		Struct structWithMarshaller
-	}{
-		Struct: structWithMarshaller{Value: 200},
-	}
+	args := structWithMarshaller{Value: 200}
 	want := []attribute.KeyValue{
 		attribute.Int("http.staus_code", 200), // `struct.` prefix is omitted
 	}
@@ -224,16 +220,12 @@ func TestMarshalOtelAttributes__WithStructInStruct(t *testing.T) {
 }
 
 func TestMarshalOtelAttributes__WithStructInStructPointer(t *testing.T) {
-	args := struct {
-		Struct *structWithNameAndOmitemptyTags
-	}{
-		Struct: &structWithNameAndOmitemptyTags{
-			BoolSlice:   []bool{true},
-			IntSlice:    []int{1},
-			Int64Slice:  []int64{2},
-			FloatSlice:  []float64{3.14, 2.71},
-			StringSlice: []string{"hello", "world"},
-		},
+	args := &structWithNameAndOmitemptyTags{
+		BoolSlice:   []bool{true},
+		IntSlice:    []int{1},
+		Int64Slice:  []int64{2},
+		FloatSlice:  []float64{3.14, 2.71},
+		StringSlice: []string{"hello", "world"},
 	}
 	want := []attribute.KeyValue{
 		attribute.BoolSlice("bs", []bool{true}),
@@ -248,16 +240,12 @@ func TestMarshalOtelAttributes__WithStructInStructPointer(t *testing.T) {
 }
 
 func TestMarshalOtelAttributes__WithStructInStructWithPrefix(t *testing.T) {
-	args := struct {
-		Struct structWithNameAndOmitemptyTags `otel:"test"`
-	}{
-		Struct: structWithNameAndOmitemptyTags{
-			BoolSlice:   []bool{true},
-			IntSlice:    []int{1},
-			Int64Slice:  []int64{2},
-			FloatSlice:  []float64{3.14, 2.71},
-			StringSlice: []string{"hello", "world"},
-		},
+	args := structWithNameAndOmitemptyTags{
+		BoolSlice:   []bool{true},
+		IntSlice:    []int{1},
+		Int64Slice:  []int64{2},
+		FloatSlice:  []float64{3.14, 2.71},
+		StringSlice: []string{"hello", "world"},
 	}
 	want := []attribute.KeyValue{
 		attribute.BoolSlice("test.bs", []bool{true}),
