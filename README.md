@@ -25,6 +25,7 @@ type HTTPContext struct {
 	RemoteAddr string // => key suffix is "remote_addr"
 
 	AuthHeader string `otel:"-"` // you also can ignore the field
+	Cookie     string `otel:",omitempty"` // you can ignore the field if it is empty
 }
 
 func main() {
@@ -32,6 +33,8 @@ func main() {
 		Status: 200,
 		Method: "GET",
 		Path:   "/",
+		AuthHeader: "Bearer xxx",
+		Cookie: "",
 	}
 	ctx, spans := otel.Tracer("handler").Start("foo", spans.WithAttrs(
 		spans.ObjectAttr("http", httpCtx),
