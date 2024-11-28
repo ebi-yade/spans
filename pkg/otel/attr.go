@@ -22,7 +22,6 @@ func MarshalOtelAttributes(v interface{}) ([]attribute.KeyValue, error) {
 }
 
 func marshalOtelAttributes(rv reflect.Value) ([]attribute.KeyValue, error) {
-	//nolint:exhaustive
 	switch rv.Kind() {
 	case reflect.Struct:
 		return marshalStruct(rv)
@@ -186,7 +185,6 @@ func marshalStruct(rv reflect.Value) ([]attribute.KeyValue, error) {
 }
 
 func marshalField(f structFiled, fv reflect.Value) ([]attribute.KeyValue, error) {
-	//nolint:exhaustive
 	switch fv.Kind() {
 	case reflect.Bool:
 		return []attribute.KeyValue{attribute.Bool(f.attributeName, fv.Bool())}, nil
@@ -238,7 +236,6 @@ func (s structFiled) marshalNested(fv reflect.Value) ([]attribute.KeyValue, erro
 }
 
 func marshalSlice(f structFiled, fv reflect.Value) ([]attribute.KeyValue, error) {
-	//nolint:exhaustive
 	switch fv.Type().Elem().Kind() {
 	case reflect.Bool:
 		return []attribute.KeyValue{attribute.BoolSlice(f.attributeName, reflectValueToSlice[bool](fv))}, nil
@@ -280,7 +277,6 @@ func reflectValueToSlice[T any](v reflect.Value) []T {
 }
 
 func isEmptyValue(v reflect.Value) bool {
-	//nolint:exhaustive
 	switch v.Kind() {
 	case reflect.Bool:
 		return !v.Bool()
