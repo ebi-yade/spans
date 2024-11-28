@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"slices"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/attribute"
 )
 
@@ -43,6 +45,38 @@ func TestMarshalOtelAttributes__PrimitiveTypes(t *testing.T) {
 		attribute.Float64Slice("float_slice", []float64{}),
 		attribute.String("string_value", "hello"),
 		attribute.StringSlice("string_slice", []string{"hello", "world"}),
+	}
+	got, err := MarshalOtelAttributes(args)
+	assert.NoError(t, err)
+	assertAttributes(t, want, got)
+}
+
+func TestMarshalOtelAttributes__Time(t *testing.T) {
+	const layout = "2006-01-02T15:04:05.999999999"
+	const testTimeStr = "2021-01-01T00:00:00.123456789"
+	testTime, err := time.ParseInLocation(layout, testTimeStr, time.FixedZone("Asia/Tokyo", 9*60*60))
+	require.NoError(t, err)
+
+	type Wrapper time.Time
+	args := struct {
+		StdTime     time.Time
+		WrapperTime Wrapper
+		Map         map[string]interface{}
+	}{
+		StdTime:     testTime,
+		WrapperTime: Wrapper(testTime),
+		Map: map[string]interface{}{
+			"std_time":     testTime,
+			"wrapper_time": Wrapper(testTime),
+		},
+	}
+
+	const expectedStr = "2021-01-01T00:00:00.123456789+09:00"
+	want := []attribute.KeyValue{
+		attribute.String("std_time", expectedStr),
+		attribute.String("wrapper_time", expectedStr),
+		attribute.String("map.std_time", expectedStr),
+		attribute.String("map.wrapper_time", expectedStr),
 	}
 	got, err := MarshalOtelAttributes(args)
 	assert.NoError(t, err)
@@ -139,11 +173,7 @@ func TestMarshalOtelAttributes__WithStructPointerMarshaller(t *testing.T) {
 }
 
 func TestMarshalOtelAttributes__NestedStructWithMarshallerMember(t *testing.T) {
-	args := struct {
-		Struct structWithMarshaller
-	}{
-		Struct: structWithMarshaller{Value: 200},
-	}
+	args := structWithMarshaller{Value: 200}
 	want := []attribute.KeyValue{
 		attribute.Int("http.staus_code", 200), // `struct.` prefix is omitted
 	}
@@ -178,11 +208,11 @@ func TestMarshalOtelAttributes__WithStructInStruct(t *testing.T) {
 		},
 	}
 	want := []attribute.KeyValue{
-		attribute.BoolSlice("bs", []bool{true}),
-		attribute.IntSlice("is", []int{1}),
-		attribute.Int64Slice("is64", []int64{2}),
-		attribute.Float64Slice("fs", []float64{3.14, 2.71}),
-		attribute.StringSlice("ss", []string{"hello", "world"}),
+		attribute.BoolSlice("struct.bs", []bool{true}),
+		attribute.IntSlice("struct.is", []int{1}),
+		attribute.Int64Slice("struct.is64", []int64{2}),
+		attribute.Float64Slice("struct.fs", []float64{3.14, 2.71}),
+		attribute.StringSlice("struct.ss", []string{"hello", "world"}),
 	}
 	got, err := MarshalOtelAttributes(args)
 	assert.NoError(t, err)
@@ -190,16 +220,12 @@ func TestMarshalOtelAttributes__WithStructInStruct(t *testing.T) {
 }
 
 func TestMarshalOtelAttributes__WithStructInStructPointer(t *testing.T) {
-	args := struct {
-		Struct *structWithNameAndOmitemptyTags
-	}{
-		Struct: &structWithNameAndOmitemptyTags{
-			BoolSlice:   []bool{true},
-			IntSlice:    []int{1},
-			Int64Slice:  []int64{2},
-			FloatSlice:  []float64{3.14, 2.71},
-			StringSlice: []string{"hello", "world"},
-		},
+	args := &structWithNameAndOmitemptyTags{
+		BoolSlice:   []bool{true},
+		IntSlice:    []int{1},
+		Int64Slice:  []int64{2},
+		FloatSlice:  []float64{3.14, 2.71},
+		StringSlice: []string{"hello", "world"},
 	}
 	want := []attribute.KeyValue{
 		attribute.BoolSlice("bs", []bool{true}),
@@ -213,11 +239,11 @@ func TestMarshalOtelAttributes__WithStructInStructPointer(t *testing.T) {
 	assertAttributes(t, want, got)
 }
 
-func TestMarshalOtelAttributes__WithStructInStructWithPrefix(t *testing.T) {
+func TestMarshalOtelAttributes__WithStructInStructWithPrefixTag(t *testing.T) {
 	args := struct {
 		Struct structWithNameAndOmitemptyTags `otel:"test"`
 	}{
-		Struct: structWithNameAndOmitemptyTags{
+		structWithNameAndOmitemptyTags{
 			BoolSlice:   []bool{true},
 			IntSlice:    []int{1},
 			Int64Slice:  []int64{2},

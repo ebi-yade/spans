@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"time"
 
 	"go.opentelemetry.io/otel/attribute"
 )
@@ -41,7 +42,7 @@ func marshalMap(rv reflect.Value) ([]attribute.KeyValue, error) {
 		return []attribute.KeyValue{}, nil
 	}
 	if keys[0].Kind() != reflect.String {
-		return nil, fmt.Errorf("unsupport map key type %s", keys[0].Type())
+		return nil, fmt.Errorf("unsupported map key type %s", keys[0].Type())
 	}
 	attrs := make([]attribute.KeyValue, 0, len(keys))
 	for index, key := range keys {
@@ -145,6 +146,12 @@ func marshalMap(rv reflect.Value) ([]attribute.KeyValue, error) {
 		case []string:
 			attrs = append(attrs, attribute.StringSlice(keyString, value))
 		default:
+			if mv.Type().ConvertibleTo(timeType) {
+				t := mv.Convert(timeType).Interface().(time.Time)
+				attrs = append(attrs, attribute.String(keyString, t.Format(time.RFC3339Nano)))
+				continue
+			}
+
 			kvs, err := marshalField(structFiled{
 				attributeName:   keyString,
 				filedIndex:      index,
@@ -192,19 +199,22 @@ func marshalField(f structFiled, fv reflect.Value) ([]attribute.KeyValue, error)
 	case reflect.Slice, reflect.Array:
 		return marshalSlice(f, fv)
 	case reflect.Struct:
-		kvs, err := MarshalOtelAttributes(fv.Interface())
-		if err != nil {
-			return nil, err
+		// convert time.Time to string
+		if fv.Type().ConvertibleTo(timeType) {
+			t := fv.Convert(timeType).Interface().(time.Time)
+			return []attribute.KeyValue{attribute.String(f.attributeName, t.Format(time.RFC3339Nano))}, nil
 		}
-		for i := range kvs {
-			kvs[i].Key = attribute.Key(f.attributePrefix) + kvs[i].Key
-		}
-		return kvs, nil
+		return f.marshalNested(fv)
+
 	case reflect.Ptr:
 		if fv.IsNil() {
 			return nil, nil
 		}
 		return marshalField(f, fv.Elem())
+
+	case reflect.Map:
+		return f.marshalNested(fv)
+
 	default:
 		bs, err := json.Marshal(fv.Interface())
 		if err != nil {
@@ -212,6 +222,17 @@ func marshalField(f structFiled, fv reflect.Value) ([]attribute.KeyValue, error)
 		}
 		return []attribute.KeyValue{attribute.String(f.attributeName, string(bs))}, nil
 	}
+}
+
+func (s structFiled) marshalNested(fv reflect.Value) ([]attribute.KeyValue, error) {
+	attrs, err := MarshalOtelAttributes(fv.Interface())
+	if err != nil {
+		return []attribute.KeyValue{}, err
+	}
+	for i := range attrs {
+		attrs[i].Key = attribute.Key(s.attributePrefix) + attrs[i].Key
+	}
+	return attrs, nil
 }
 
 func marshalSlice(f structFiled, fv reflect.Value) ([]attribute.KeyValue, error) {
@@ -226,13 +247,23 @@ func marshalSlice(f structFiled, fv reflect.Value) ([]attribute.KeyValue, error)
 		return []attribute.KeyValue{attribute.Float64Slice(f.attributeName, reflectValueToSlice[float64](fv))}, nil
 	case reflect.String:
 		return []attribute.KeyValue{attribute.StringSlice(f.attributeName, reflectValueToSlice[string](fv))}, nil
-	default:
-		bs, err := json.Marshal(fv.Interface())
-		if err != nil {
-			return []attribute.KeyValue{}, err
+	case reflect.Struct:
+		if fv.Type().Elem().ConvertibleTo(timeType) {
+			strs := make([]string, fv.Len())
+			for i := 0; i < fv.Len(); i++ {
+				t := fv.Index(i).Convert(timeType).Interface().(time.Time)
+				strs[i] = t.Format(time.RFC3339Nano)
+			}
+			return []attribute.KeyValue{attribute.StringSlice(f.attributeName, strs)}, nil
 		}
-		return []attribute.KeyValue{attribute.String(f.attributeName, string(bs))}, nil
+		// There is no choice but to provide only stringification because composite arrays are not supported at the OpenTelemetry protocol level.
 	}
+	bs, err := json.Marshal(fv.Interface())
+	if err != nil {
+		return []attribute.KeyValue{}, err
+	}
+
+	return []attribute.KeyValue{attribute.String(f.attributeName, string(bs))}, nil
 }
 
 func reflectValueToSlice[T any](v reflect.Value) []T {

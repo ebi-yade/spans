@@ -3,6 +3,7 @@ package otel
 import (
 	"reflect"
 	"sync"
+	"time"
 )
 
 type cache[T any] struct {
@@ -28,3 +29,5 @@ func (c *cache[T]) set(t reflect.Type, v T) {
 	c.cache[t] = v
 	c.mu.Unlock()
 }
+
+var timeType = reflect.TypeOf(time.Time{})

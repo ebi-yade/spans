@@ -33,11 +33,10 @@ func getStructFields(t reflect.Type) []structFiled {
 			continue
 		}
 		attributeName := tagParts[0]
-		attributePrefix := tagParts[0] + "."
 		if attributeName == "" {
 			attributeName = camelToSnake(f.Name)
-			attributePrefix = ""
 		}
+		attributePrefix := attributeName + "."
 		var omitEmpty bool
 		for _, part := range tagParts[1:] {
 			if part == "omitempty" {
