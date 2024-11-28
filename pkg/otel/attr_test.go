@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"slices"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/attribute"
 )
 
@@ -43,6 +45,38 @@ func TestMarshalOtelAttributes__PrimitiveTypes(t *testing.T) {
 		attribute.Float64Slice("float_slice", []float64{}),
 		attribute.String("string_value", "hello"),
 		attribute.StringSlice("string_slice", []string{"hello", "world"}),
+	}
+	got, err := MarshalOtelAttributes(args)
+	assert.NoError(t, err)
+	assertAttributes(t, want, got)
+}
+
+func TestMarshalOtelAttributes__Time(t *testing.T) {
+	const layout = "2006-01-02T15:04:05.999999999"
+	const testTimeStr = "2021-01-01T00:00:00.123456789"
+	testTime, err := time.ParseInLocation(layout, testTimeStr, time.FixedZone("Asia/Tokyo", 9*60*60))
+	require.NoError(t, err)
+
+	type Wrapper time.Time
+	args := struct {
+		StdTime     time.Time
+		WrapperTime Wrapper
+		Map         map[string]interface{}
+	}{
+		StdTime:     testTime,
+		WrapperTime: Wrapper(testTime),
+		Map: map[string]interface{}{
+			"std_time":     testTime,
+			"wrapper_time": Wrapper(testTime),
+		},
+	}
+
+	const expectedStr = "2021-01-01T00:00:00.123456789+09:00"
+	want := []attribute.KeyValue{
+		attribute.String("std_time", expectedStr),
+		attribute.String("wrapper_time", expectedStr),
+		attribute.String("map.std_time", expectedStr),
+		attribute.String("map.wrapper_time", expectedStr),
 	}
 	got, err := MarshalOtelAttributes(args)
 	assert.NoError(t, err)
