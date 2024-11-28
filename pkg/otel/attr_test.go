@@ -208,11 +208,11 @@ func TestMarshalOtelAttributes__WithStructInStruct(t *testing.T) {
 		},
 	}
 	want := []attribute.KeyValue{
-		attribute.BoolSlice("bs", []bool{true}),
-		attribute.IntSlice("is", []int{1}),
-		attribute.Int64Slice("is64", []int64{2}),
-		attribute.Float64Slice("fs", []float64{3.14, 2.71}),
-		attribute.StringSlice("ss", []string{"hello", "world"}),
+		attribute.BoolSlice("struct.bs", []bool{true}),
+		attribute.IntSlice("struct.is", []int{1}),
+		attribute.Int64Slice("struct.is64", []int64{2}),
+		attribute.Float64Slice("struct.fs", []float64{3.14, 2.71}),
+		attribute.StringSlice("struct.ss", []string{"hello", "world"}),
 	}
 	got, err := MarshalOtelAttributes(args)
 	assert.NoError(t, err)
@@ -239,13 +239,17 @@ func TestMarshalOtelAttributes__WithStructInStructPointer(t *testing.T) {
 	assertAttributes(t, want, got)
 }
 
-func TestMarshalOtelAttributes__WithStructInStructWithPrefix(t *testing.T) {
-	args := structWithNameAndOmitemptyTags{
-		BoolSlice:   []bool{true},
-		IntSlice:    []int{1},
-		Int64Slice:  []int64{2},
-		FloatSlice:  []float64{3.14, 2.71},
-		StringSlice: []string{"hello", "world"},
+func TestMarshalOtelAttributes__WithStructInStructWithPrefixTag(t *testing.T) {
+	args := struct {
+		Struct structWithNameAndOmitemptyTags `otel:"test"`
+	}{
+		structWithNameAndOmitemptyTags{
+			BoolSlice:   []bool{true},
+			IntSlice:    []int{1},
+			Int64Slice:  []int64{2},
+			FloatSlice:  []float64{3.14, 2.71},
+			StringSlice: []string{"hello", "world"},
+		},
 	}
 	want := []attribute.KeyValue{
 		attribute.BoolSlice("test.bs", []bool{true}),
