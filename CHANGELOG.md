@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.0.4](https://github.com/ebi-yade/spans/compare/v0.0.3...v0.0.4) - 2024-11-28
+- Stringify time.Time in format of RFC3339 by @ebi-yade in https://github.com/ebi-yade/spans/pull/12
+
 ## [v0.0.3](https://github.com/ebi-yade/spans/compare/v0.0.2...v0.0.3) - 2024-11-27
 - Implement the processor for Google Cloud Trace by @ebi-yade in https://github.com/ebi-yade/spans/pull/11
 
