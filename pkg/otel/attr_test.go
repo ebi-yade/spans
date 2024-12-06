@@ -83,6 +83,22 @@ func TestMarshalOtelAttributes__Time(t *testing.T) {
 	assertAttributes(t, want, got)
 }
 
+func TestMarshalOtelAttributes__WithTypedNil(t *testing.T) {
+	var args *structNoTags
+	want := make([]attribute.KeyValue, 0)
+	got, err := MarshalOtelAttributes(args)
+	assert.NoError(t, err)
+	assertAttributes(t, want, got)
+}
+
+func TestMarshalOtelAttributes__WithNil(t *testing.T) {
+	var args interface{}
+	want := make([]attribute.KeyValue, 0)
+	got, err := MarshalOtelAttributes(args)
+	assert.NoError(t, err)
+	assertAttributes(t, want, got)
+}
+
 type structWithNameTags struct {
 	BoolValue   bool      `otel:"b"`
 	BoolSlice   []bool    `otel:"bs"`

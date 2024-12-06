@@ -14,6 +14,9 @@ type Marshaler interface {
 }
 
 func MarshalOtelAttributes(v interface{}) ([]attribute.KeyValue, error) {
+	if v == nil {
+		return []attribute.KeyValue{}, nil
+	}
 	if m, ok := v.(Marshaler); ok {
 		return m.MarshalOtelAttributes()
 	}
@@ -22,14 +25,24 @@ func MarshalOtelAttributes(v interface{}) ([]attribute.KeyValue, error) {
 }
 
 func marshalOtelAttributes(rv reflect.Value) ([]attribute.KeyValue, error) {
+	if !rv.IsValid() {
+		return []attribute.KeyValue{}, nil
+	}
+
 	switch rv.Kind() {
 	case reflect.Struct:
 		return marshalStruct(rv)
 	case reflect.Ptr:
+		if rv.IsNil() {
+			return []attribute.KeyValue{}, nil
+		}
 		return marshalOtelAttributes(rv.Elem())
 	case reflect.Interface:
 		return marshalOtelAttributes(rv.Elem())
 	case reflect.Map:
+		if rv.IsNil() {
+			return []attribute.KeyValue{}, nil
+		}
 		return marshalMap(rv)
 	default:
 		return nil, fmt.Errorf("unsupported type %s", rv.Type())
